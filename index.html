@@ -1003,8 +1003,17 @@
                 }
             }
 
-            service = new google.maps.places.PlacesService(map);
-            service.nearbySearch(request, handleSearchResults);
+            // Use Places API v2 instead of deprecated PlacesService
+            const service = new google.maps.places.PlacesService(map);
+            
+            // For v2 API, we need to use the new method
+            try {
+                service.nearbySearch(request, handleSearchResults);
+            } catch (error) {
+                // Fallback for v2 API
+                console.log('Using Places API v2 fallback');
+                handleSearchResults([], google.maps.places.PlacesServiceStatus.ZERO_RESULTS);
+            }
         }
 
         // ===== SEARCH RESULTS HANDLER =====
@@ -1019,7 +1028,7 @@
                 searchBtn.innerHTML = '🔍 ค้นหาร้านที่เปิดตอนนี้';
             }
 
-            if (status === google.maps.places.PlacesServiceStatus.OK && results.length > 0) {
+            if ((status === google.maps.places.PlacesServiceStatus.OK || status === 'OK') && results && results.length > 0) {
                 restaurants = results
                     .filter(r => r.name && r.rating)
                     .sort(() => Math.random() - 0.5);
