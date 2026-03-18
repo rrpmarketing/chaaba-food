@@ -895,6 +895,13 @@
                 currentPos.lat = newPos.lat();
                 currentPos.lng = newPos.lng();
                 map.setCenter(newPos);
+                
+                // Auto-search when marker is moved
+                console.log('Marker moved to:', currentPos);
+                // Automatically trigger search after marker is moved
+                setTimeout(() => {
+                    fetchStores();
+                }, 500);
             });
 
             updateHistoryUI();
