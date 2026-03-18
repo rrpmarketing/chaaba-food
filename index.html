@@ -968,10 +968,18 @@
                 searchBtn.innerHTML = '⏳ กำลังค้นหา...';
             }
 
+            // Set timeout for API call (5 seconds)
+            window.searchTimeout = setTimeout(() => {
+                if (searchBtn) {
+                    searchBtn.disabled = false;
+                    searchBtn.innerHTML = '🔍 ค้นหาร้านที่เปิดตอนนี้';
+                }
+                alert('การค้นหาลองเวลานาน ลองลองครับ หรือลองขยายระยะทางดู');
+            }, 5000);
+
             const request = {
                 location: currentPos,
-                radius: radius,
-                openNow: true
+                radius: radius
             };
 
             if (price) request.minPriceLevel = parseInt(price);
@@ -1001,6 +1009,9 @@
 
         // ===== SEARCH RESULTS HANDLER =====
         function handleSearchResults(results, status) {
+            // Clear timeout
+            clearTimeout(window.searchTimeout);
+
             // Reset loading state
             const searchBtn = document.querySelector('.btn-search');
             if (searchBtn) {
