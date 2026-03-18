@@ -968,14 +968,14 @@
                 searchBtn.innerHTML = '⏳ กำลังค้นหา...';
             }
 
-            // Set timeout for API call (5 seconds)
+            // Set timeout for API call (3 seconds)
             window.searchTimeout = setTimeout(() => {
                 if (searchBtn) {
                     searchBtn.disabled = false;
                     searchBtn.innerHTML = '🔍 ค้นหาร้านที่เปิดตอนนี้';
                 }
                 alert('การค้นหาลองเวลานาน ลองลองครับ หรือลองขยายระยะทางดู');
-            }, 5000);
+            }, 3000);
 
             const request = {
                 location: currentPos,
@@ -1031,7 +1031,8 @@
             if ((status === google.maps.places.PlacesServiceStatus.OK || status === 'OK') && results && results.length > 0) {
                 restaurants = results
                     .filter(r => r.name && r.rating)
-                    .sort(() => Math.random() - 0.5);
+                    .sort(() => Math.random() - 0.5)
+                    .slice(0, 20);
 
                 if (restaurants.length === 0) {
                     alert('ไม่พบร้านที่มีคะแนนในขณะนี้ ลองเปลี่ยนหมวดหมู่ดูนะ!');
