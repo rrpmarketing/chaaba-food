@@ -843,7 +843,16 @@
             document.getElementById(tabName + '-tab').classList.remove('hidden');
 
             // Add active class to clicked button
-            event.target.classList.add('active');
+            if (event && event.target) {
+                event.target.classList.add('active');
+            } else {
+                // Fallback: add active to the button that matches tabName
+                document.querySelectorAll('.tab-button').forEach((btn, idx) => {
+                    if ((idx === 0 && tabName === 'randomizer') || (idx === 1 && tabName === 'favorites')) {
+                        btn.classList.add('active');
+                    }
+                });
+            }
 
             // Update favorites list if switching to favorites tab
             if (tabName === 'favorites') {
