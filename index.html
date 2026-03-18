@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>CHAABA ULTIMATE - RRP Food Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: 'Kanit', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1a1f35 100%);
+            color: white;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* ===== GOLD & SLATE THEME VARIABLES ===== */
+        :root {
+            --gold-primary: #d4af37;
+            --gold-light: #f4d03f;
+            --gold-dark: #b8860b;
+            --slate-dark: #0f172a;
+            --slate-medium: #1e293b;
+            --slate-light: #334155;
+            --slate-lighter: #64748b;
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ===== CARD STYLES ===== */
+        .card {
+            background: var(--slate-medium);
+            border-radius: 24px;
+            border: 2px solid var(--slate-light);
+            transition: var(--transition-smooth);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .card:hover {
+            border-color: var(--gold-primary);
+            box-shadow: 0 12px 48px rgba(212, 175, 55, 0.15);
+            transform: translateY(-2px);
+        }
+
+        /* ===== MAP STYLES ===== */
+        #map {
+            height: 350px;
+            width: 100%;
+            border-radius: 20px;
+            box-shadow: inset 0 0 20px rgba(212, 175, 55, 0.1);
+            background: var(--slate-dark);
+        }
+
+        /* ===== WHEEL CANVAS STYLES ===== */
+        #wheel-canvas {
+            width: 350px;
+            height: 350px;
+            border-radius: 50%;
+            border: 8px solid var(--gold-primary);
+            transition: transform 5s cubic-bezier(0.15, 0, 0.15, 1);
+            box-shadow: 0 0 40px rgba(212, 175, 55, 0.4);
+            filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.2));
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* ===== POINTER STYLES ===== */
+        .pointer {
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 40px solid #ef4444;
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 50;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+        }
+
+        /* ===== BUTTON BASE STYLES ===== */
+        button {
+            transition: var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
+            border: none;
+            cursor: pointer;
+            font-family: 'Kanit', sans-serif;
+            font-weight: 600;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* ===== SEARCH BUTTON ===== */
+        .btn-search {
+            background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold-primary) 100%);
+            color: var(--slate-dark);
+            font-weight: 800;
+            padding: 1.5rem;
+            border-radius: 1.5rem;
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            box-shadow: 0 8px 24px rgba(212, 175, 55, 0.3);
+            width: 100%;
+        }
+
+        .btn-search:hover:not(:disabled) {
+            background: linear-gradient(135deg, #f4d03f 0%, #e6c200 100%);
+            box-shadow: 0 12px 36px rgba(212, 175, 55, 0.5);
+            transform: translateY(-2px);
+        }
+
+        /* ===== SPIN BUTTON ===== */
+        .btn-spin {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            padding: clamp(1rem, 3vw, 1.5rem) clamp(2rem, 8vw, 5rem);
+            border-radius: 9999px;
+            font-size: clamp(1.25rem, 3vw, 1.875rem);
+            font-weight: 800;
+            box-shadow: 0 8px 24px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-spin:hover:not(:disabled) {
+            background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+            box-shadow: 0 12px 36px rgba(239, 68, 68, 0.5);
+            transform: translateY(-2px);
+        }
+
+        /* ===== FAVORITE BUTTON ===== */
+        .btn-favorite {
+            background: linear-gradient(135deg, #ec4899 0%, #be185d 100%);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 700;
+            font-size: 0.875rem;
+            box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-favorite:hover:not(:disabled) {
+            background: linear-gradient(135deg, #f472b6 0%, #ec4899 100%);
+            box-shadow: 0 6px 20px rgba(236, 72, 153, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-favorite.favorited {
+            background: linear-gradient(135deg, #f472b6 0%, #ec4899 100%);
+        }
+
+        /* ===== DELIVERY APP BUTTONS ===== */
+        .btn-grab {
+            background: linear-gradient(135deg, #00b14f 0%, #008c3a 100%);
+            color: white;
+        }
+
+        .btn-grab:hover:not(:disabled) {
+            background: linear-gradient(135deg, #00d65f 0%, #00b14f 100%);
+            box-shadow: 0 8px 20px rgba(0, 177, 79, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-lineman {
+            background: linear-gradient(135deg, #06c755 0%, #04a340 100%);
+            color: white;
+        }
+
+        .btn-lineman:hover:not(:disabled) {
+            background: linear-gradient(135deg, #2dd876 0%, #06c755 100%);
+            box-shadow: 0 8px 20px rgba(6, 199, 85, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-shopeefood {
+            background: linear-gradient(135deg, #ee4d2d 0%, #c41d1d 100%);
+            color: white;
+        }
+
+        .btn-shopeefood:hover:not(:disabled) {
+            background: linear-gradient(135deg, #f77d5d 0%, #ee4d2d 100%);
+            box-shadow: 0 8px 20px rgba(238, 77, 45, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-maps {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .btn-maps:hover:not(:disabled) {
+            background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-share {
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+            color: white;
+        }
+
+        .btn-share:hover:not(:disabled) {
+            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-close {
+            background: transparent;
+            color: var(--slate-lighter);
+            padding: 0.5rem;
+        }
+
+        .btn-close:hover {
+            color: white;
+        }
+
+        /* ===== INPUT & SELECT STYLES ===== */
+        input, select {
+            background: var(--slate-dark) !important;
+            border: 2px solid var(--slate-light) !important;
+            border-radius: 0.75rem !important;
+            padding: 1rem !important;
+            color: white !important;
+            font-weight: 600 !important;
+            transition: var(--transition-smooth);
+            font-family: 'Kanit', sans-serif !important;
+            font-size: clamp(0.875rem, 2vw, 1rem) !important;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--gold-primary) !important;
+            box-shadow: 0 0 12px rgba(212, 175, 55, 0.3) !important;
+        }
+
+        input::placeholder {
+            color: var(--slate-lighter) !important;
+        }
+
+        /* ===== HEADER STYLES ===== */
+        header h1 {
+            font-size: clamp(2rem, 8vw, 4rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold-primary) 50%, var(--gold-dark) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(212, 175, 55, 0.2);
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
+        }
+
+        header p {
+            color: var(--slate-lighter);
+            font-size: clamp(0.75rem, 2vw, 1.125rem);
+            letter-spacing: 0.1em;
+            line-height: 1.4;
+        }
+
+        /* ===== POPUP STYLES ===== */
+        #popup {
+            backdrop-filter: blur(8px);
+            animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .popup-content {
+            background: linear-gradient(135deg, var(--slate-medium) 0%, #2d3748 100%);
+            border: 3px solid var(--gold-primary);
+            border-radius: 2.5rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            max-width: 95vw;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .emoji-badge {
+            background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold-primary) 100%);
+            border: 4px solid var(--slate-medium);
+            box-shadow: 0 8px 24px rgba(212, 175, 55, 0.3);
+        }
+
+        /* ===== FAVORITES MODAL ===== */
+        .favorites-modal {
+            animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .favorite-item {
+            background: var(--slate-light);
+            border-left: 4px solid var(--gold-primary);
+            padding: 1rem;
+            border-radius: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: slideInLeft 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .favorite-item:hover {
+            background: var(--slate-light);
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2);
+        }
+
+        /* ===== HISTORY ITEM ANIMATION ===== */
+        .history-item {
+            animation: slideInLeft 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* ===== LOADING STATE ===== */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        /* ===== ACCESSIBILITY ===== */
+        button:focus-visible {
+            outline: 3px solid var(--gold-primary);
+            outline-offset: 2px;
+        }
+
+        input:focus-visible, select:focus-visible {
+            outline: 3px solid var(--gold-primary);
+            outline-offset: 2px;
+        }
+
+        /* ===== RESPONSIVE DESIGN ===== */
+        @media (max-width: 1024px) {
+            #wheel-canvas {
+                width: 300px;
+                height: 300px;
+            }
+
+            .card {
+                border-radius: 20px;
+            }
+
+            header h1 {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            #wheel-canvas {
+                width: 280px;
+                height: 280px;
+                border-width: 6px;
+            }
+
+            .btn-spin {
+                padding: 1rem 2.5rem;
+                font-size: 1.25rem;
+            }
+
+            header h1 {
+                font-size: 2rem;
+                margin-bottom: 0.25rem;
+            }
+
+            header p {
+                font-size: 0.75rem;
+                margin-top: 0.5rem;
+            }
+
+            .card {
+                padding: 1.25rem !important;
+                border-radius: 16px;
+            }
+
+            #map {
+                height: 280px;
+            }
+
+            .grid {
+                gap: 1rem !important;
+            }
+
+            .popup-content {
+                padding: 1.5rem !important;
+                border-radius: 2rem;
+            }
+
+            .emoji-badge {
+                width: 20vw !important;
+                height: 20vw !important;
+                max-width: 80px;
+                max-height: 80px;
+                font-size: 2.5rem !important;
+            }
+
+            #winner-name {
+                font-size: 1.5rem !important;
+            }
+
+            .btn-search {
+                padding: 1rem !important;
+                font-size: 1rem !important;
+            }
+
+            .btn-maps, .btn-share, .btn-favorite {
+                padding: 0.75rem !important;
+                font-size: 0.875rem !important;
+            }
+
+            .btn-grab, .btn-lineman, .btn-shopeefood {
+                padding: 0.75rem !important;
+                font-size: 0.75rem !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 0.75rem;
+            }
+
+            .max-w-7xl {
+                margin-left: auto;
+                margin-right: auto;
+                padding: 0;
+            }
+
+            header {
+                margin-bottom: 1.5rem;
+            }
+
+            header h1 {
+                font-size: 1.5rem;
+                margin-bottom: 0.25rem;
+            }
+
+            header p {
+                font-size: 0.65rem;
+                letter-spacing: 0.05em;
+            }
+
+            #wheel-canvas {
+                width: 240px;
+                height: 240px;
+                border-width: 5px;
+            }
+
+            .btn-spin {
+                padding: 0.75rem 1.5rem;
+                font-size: 1.125rem;
+            }
+
+            .card {
+                padding: 1rem !important;
+                border-radius: 12px;
+                margin-bottom: 0.5rem;
+            }
+
+            #map {
+                height: 220px;
+            }
+
+            input, select {
+                padding: 0.75rem !important;
+                font-size: 0.8rem !important;
+            }
+
+            .grid {
+                grid-template-columns: 1fr !important;
+                gap: 0.75rem !important;
+            }
+
+            .popup-content {
+                padding: 1rem !important;
+                border-radius: 1.5rem;
+                border-width: 2px;
+            }
+
+            .emoji-badge {
+                width: 60px !important;
+                height: 60px !important;
+                font-size: 2rem !important;
+                top: -30px !important;
+            }
+
+            #winner-name {
+                font-size: 1.25rem !important;
+                margin: 0.75rem 0 !important;
+            }
+
+            .btn-search {
+                padding: 0.875rem !important;
+                font-size: 0.9rem !important;
+            }
+
+            .btn-maps, .btn-share, .btn-favorite {
+                padding: 0.625rem !important;
+                font-size: 0.75rem !important;
+                gap: 0.25rem !important;
+            }
+
+            .btn-grab, .btn-lineman, .btn-shopeefood {
+                padding: 0.625rem !important;
+                font-size: 0.65rem !important;
+                gap: 0.25rem !important;
+            }
+
+            #action-area {
+                padding: 1.5rem !important;
+                margin-top: 1.5rem !important;
+            }
+
+            #action-area h2 {
+                font-size: 1.25rem !important;
+                margin-bottom: 1rem !important;
+            }
+
+            .favorite-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+        }
+
+        @media (max-height: 600px) and (orientation: landscape) {
+            #wheel-canvas {
+                width: 200px;
+                height: 200px;
+                border-width: 4px;
+            }
+
+            .btn-spin {
+                padding: 0.5rem 2rem;
+                font-size: 1rem;
+            }
+
+            #map {
+                height: 200px;
+            }
+
+            header {
+                margin-bottom: 0.5rem;
+            }
+
+            header h1 {
+                font-size: 1.25rem;
+            }
+
+            header p {
+                font-size: 0.6rem;
+            }
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+
+            .card, button, #popup, #favorites-modal {
+                display: none;
+            }
+        }
+
+        /* ===== TAB NAVIGATION ===== */
+        .tab-button {
+            background: transparent;
+            color: var(--slate-lighter);
+            border-bottom: 3px solid transparent;
+            padding: 1rem;
+            font-weight: 600;
+            transition: var(--transition-smooth);
+        }
+
+        .tab-button.active {
+            color: var(--gold-primary);
+            border-bottom-color: var(--gold-primary);
+        }
+
+        .tab-button:hover {
+            color: var(--gold-light);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        <!-- HEADER -->
+        <header class="text-center mb-8 md:mb-12">
+            <h1 class="italic">CHAABA</h1>
+            <p class="uppercase tracking-widest mt-2">The Perfect Decision Maker for RRP Marketing</p>
+        </header>
+
+        <!-- TAB NAVIGATION -->
+        <div class="flex gap-4 mb-8 border-b border-slate-700 overflow-x-auto">
+            <button class="tab-button active" onclick="switchTab('randomizer')">🎯 Randomizer</button>
+            <button class="tab-button" onclick="switchTab('favorites')">❤️ Favorites</button>
+        </div>
+
+        <!-- RANDOMIZER TAB -->
+        <div id="randomizer-tab">
+            <!-- MAIN GRID -->
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <!-- LEFT SECTION: MAP & HISTORY -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- MAP CARD -->
+                    <div class="card p-6">
+                        <h2 class="text-lg md:text-xl font-bold mb-4 flex items-center gap-2">
+                            <span>📍</span>
+                            <span>RRP Marketing Center</span>
+                        </h2>
+                        <div id="map"></div>
+                    </div>
+
+                    <!-- HISTORY CARD -->
+                    <div class="card p-6">
+                        <h2 class="text-lg md:text-xl font-bold mb-4 text-slate-400">📜 ประวัติ 5 มื้อล่าสุด</h2>
+                        <div id="history-list" class="space-y-2"></div>
+                    </div>
+                </div>
+
+                <!-- RIGHT SECTION: SETUP -->
+                <div class="lg:col-span-2 card p-6 md:p-8 space-y-6">
+                    <h2 class="text-xl md:text-2xl font-bold border-b-2 border-yellow-500 pb-4 text-yellow-400 italic uppercase">Setup Your Meal</h2>
+
+                    <!-- RADIUS & PRICE GRID -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-2 uppercase font-bold tracking-tighter">รัศมี (เมตร)</label>
+                            <input type="number" id="radius" value="1500" min="100" max="5000" step="100">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-2 uppercase font-bold tracking-tighter">งบประมาณ</label>
+                            <select id="price-level">
+                                <option value="">ทุกราคา</option>
+                                <option value="1">฿ ประหยัด</option>
+                                <option value="2">฿฿ ทั่วไป</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- CATEGORY SELECT -->
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-2 uppercase font-bold tracking-tighter">อยากกินอะไรดี</label>
+                        <select id="category">
+                            <option value="restaurant">🍴 ทุกอย่าง (สุ่มร้านอาหาร)</option>
+                            <option value="somtum">🍗 ส้มตำ / ไก่ย่าง / ลาบ</option>
+                            <option value="wild_food">🐗 อาหารป่า / รสจัดจ้าน</option>
+                            <option value="noodle_shop">🍜 ก๋วยเตี๋ยว / บะหมี่</option>
+                            <option value="thai_restaurant">🥗 อาหารไทย / ตามสั่ง</option>
+                            <option value="shabu">🥘 ชาบู / หมูกระทะ</option>
+                            <option value="cafe">☕ คาเฟ่ / ร้านกาแฟ</option>
+                        </select>
+                    </div>
+
+                    <!-- SEARCH BUTTON -->
+                    <button onclick="fetchStores()" class="btn-search">
+                        🔍 ค้นหาร้านที่เปิดตอนนี้
+                    </button>
+                </div>
+            </div>
+
+            <!-- WHEEL SECTION -->
+            <div id="action-area" class="hidden mt-10 card p-8 md:p-10 text-center bg-slate-800/50">
+                <h2 class="text-xl md:text-3xl font-bold mb-8 uppercase italic tracking-widest text-white">
+                    พบร้านที่น่ากิน <span id="store-count" class="text-yellow-400">0</span> แห่ง
+                </h2>
+                <div class="relative inline-block mb-10">
+                    <div class="pointer"></div>
+                    <canvas id="wheel-canvas" width="500" height="500"></canvas>
+                </div>
+                <div>
+                    <button onclick="spinNow()" id="spin-btn" class="btn-spin">
+                        หมุนวงล้อเลย!
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAVORITES TAB -->
+        <div id="favorites-tab" class="hidden">
+            <div class="card p-8 favorites-modal">
+                <h2 class="text-2xl font-bold mb-6 text-yellow-400">❤️ ร้านอาหารที่บันทึกไว้</h2>
+                <div id="favorites-list" class="space-y-3">
+                    <p class="text-slate-400 text-center py-8">ยังไม่มีร้านอาหารที่บันทึก ลองสุ่มแล้วบันทึกร้านที่ชอบ!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RESULT POPUP -->
+    <div id="popup" class="fixed inset-0 bg-slate-950/95 hidden z-[100] flex items-center justify-center p-4">
+        <div class="popup-content max-w-sm w-full text-center relative">
+            <div class="absolute -top-12 left-1/2 -translate-x-1/2 emoji-badge w-24 h-24 rounded-full flex items-center justify-center text-5xl">😋</div>
+            
+            <h2 class="text-slate-400 uppercase font-bold text-sm tracking-widest mt-8">ผลการสุ่มคือ...</h2>
+            <h3 id="winner-name" class="text-2xl md:text-3xl font-black text-white my-4 leading-tight">ชื่อร้านอาหาร</h3>
+            
+            <!-- RATING SECTION -->
+            <div class="mb-6 bg-slate-900/80 py-3 rounded-2xl border-2 border-slate-700">
+                <div class="text-lg md:text-xl text-yellow-400 font-bold">
+                    <span id="rating-stars">⭐⭐⭐⭐</span>
+                    <span id="rating-num">4.5</span>
+                </div>
+                <p id="total-reviews" class="text-[10px] text-slate-500 mt-1"></p>
+            </div>
+
+            <!-- ACTION BUTTONS -->
+            <div class="flex flex-col gap-3 mb-6">
+                <button id="go-link" class="btn-maps py-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg w-full">
+                    📍 ไปที่ร้าน (Maps)
+                </button>
+                
+                <button id="favorite-btn" class="btn-favorite w-full py-3 rounded-xl justify-center">
+                    ❤️ บันทึกร้านนี้
+                </button>
+                
+                <div class="text-[10px] text-slate-500 font-bold uppercase mt-2">--- สั่งเลยผ่านแอป ---</div>
+                
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="grab-link" class="btn-grab py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1 shadow">
+                        🛵 GRAB
+                    </button>
+                    <button id="lineman-link" class="btn-lineman py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1 shadow">
+                        🛵 LINE MAN
+                    </button>
+                </div>
+                
+                <button id="shopee-link" class="btn-shopeefood py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1 shadow w-full">
+                    🛵 SHOPEE FOOD
+                </button>
+            </div>
+            
+            <!-- SHARE BUTTON -->
+            <button id="share-link" class="btn-share text-sm font-bold py-3 rounded-xl mb-4 w-full flex items-center justify-center gap-2">
+                📋 คัดลอกสรุปไปวางในกลุ่ม
+            </button>
+            
+            <!-- CLOSE BUTTON -->
+            <button onclick="document.getElementById('popup').classList.add('hidden')" class="btn-close text-xs font-bold uppercase tracking-widest">
+                ปิดหน้าต่าง
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ===== GLOBAL VARIABLES =====
+        let map, marker, service, restaurants = [];
+        let history = JSON.parse(localStorage.getItem('chaaba_history') || '[]');
+        let favorites = JSON.parse(localStorage.getItem('chaaba_favorites') || '[]');
+        let currentWinner = null;
+        const currentPos = { lat: 16.81851607272096, lng: 100.25554925565562 };
+
+        // ===== TAB SWITCHING =====
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.getElementById('randomizer-tab').classList.add('hidden');
+            document.getElementById('favorites-tab').classList.add('hidden');
+
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.remove('hidden');
+
+            // Add active class to clicked button
+            event.target.classList.add('active');
+
+            // Update favorites list if switching to favorites tab
+            if (tabName === 'favorites') {
+                updateFavoritesList();
+            }
+        }
+
+        // ===== MAP INITIALIZATION =====
+        function initMap() {
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: currentPos,
+                zoom: 17,
+                styles: [
+                    { "elementType": "geometry", "stylers": [{ "color": "#242f3e" }] },
+                    { "featureType": "road", "stylers": [{ "color": "#38414e" }] }
+                ]
+            });
+
+            marker = new google.maps.Marker({
+                position: currentPos,
+                map: map,
+                draggable: true,
+                animation: google.maps.Animation.DROP
+            });
+
+            updateHistoryUI();
+        }
+
+        // ===== HISTORY MANAGEMENT =====
+        function updateHistoryUI() {
+            const list = document.getElementById('history-list');
+            if (history.length === 0) {
+                list.innerHTML = '<p class="text-xs text-slate-600 italic">ยังไม่มีประวัติ...</p>';
+                return;
+            }
+            list.innerHTML = history.map(item =>
+                `<div class="history-item bg-slate-700/50 p-3 rounded-lg text-[10px] text-slate-300 flex justify-between items-center border-l-2 border-yellow-500">
+                    <span>🕒 ${item.name}</span>
+                    <span class="text-slate-500">${item.date}</span>
+                </div>`
+            ).join('');
+        }
+
+        // ===== FAVORITES MANAGEMENT =====
+        function addToFavorites(restaurant) {
+            const isFavorited = favorites.some(fav => fav.place_id === restaurant.place_id);
+            
+            if (isFavorited) {
+                favorites = favorites.filter(fav => fav.place_id !== restaurant.place_id);
+            } else {
+                favorites.push({
+                    name: restaurant.name,
+                    rating: restaurant.rating,
+                    place_id: restaurant.place_id,
+                    lat: restaurant.geometry.location.lat(),
+                    lng: restaurant.geometry.location.lng(),
+                    user_ratings_total: restaurant.user_ratings_total,
+                    addedDate: new Date().toLocaleDateString('th-TH')
+                });
+            }
+            
+            localStorage.setItem('chaaba_favorites', JSON.stringify(favorites));
+            updateFavoriteBtnState(restaurant.place_id);
+        }
+
+        function updateFavoriteBtnState(placeId) {
+            const btn = document.getElementById('favorite-btn');
+            const isFavorited = favorites.some(fav => fav.place_id === placeId);
+            
+            if (isFavorited) {
+                btn.classList.add('favorited');
+                btn.innerHTML = '❤️ บันทึกแล้ว';
+            } else {
+                btn.classList.remove('favorited');
+                btn.innerHTML = '❤️ บันทึกร้านนี้';
+            }
+        }
+
+        function updateFavoritesList() {
+            const list = document.getElementById('favorites-list');
+            
+            if (favorites.length === 0) {
+                list.innerHTML = '<p class="text-slate-400 text-center py-8">ยังไม่มีร้านอาหารที่บันทึก ลองสุ่มแล้วบันทึกร้านที่ชอบ!</p>';
+                return;
+            }
+
+            list.innerHTML = favorites.map((fav, index) =>
+                `<div class="favorite-item">
+                    <div class="flex-1">
+                        <div class="font-bold text-white">${fav.name}</div>
+                        <div class="text-sm text-yellow-400">⭐ ${fav.rating || 'N/A'} (${fav.user_ratings_total || 0} รีวิว)</div>
+                        <div class="text-xs text-slate-500">บันทึกเมื่อ: ${fav.addedDate}</div>
+                    </div>
+                    <button onclick="removeFavorite(${index})" class="btn-favorite" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); padding: 0.5rem 1rem;">
+                        🗑️ ลบ
+                    </button>
+                </div>`
+            ).join('');
+        }
+
+        function removeFavorite(index) {
+            favorites.splice(index, 1);
+            localStorage.setItem('chaaba_favorites', JSON.stringify(favorites));
+            updateFavoritesList();
+        }
+
+        // ===== STORE FETCHING =====
+        function fetchStores() {
+            const radius = parseInt(document.getElementById('radius').value);
+            const category = document.getElementById('category').value;
+            const price = document.getElementById('price-level').value;
+
+            if (isNaN(radius) || radius < 100 || radius > 5000) {
+                alert('กรุณาใส่รัศมี 100-5000 เมตร');
+                return;
+            }
+
+            const request = {
+                location: currentPos,
+                radius: radius,
+                openNow: true
+            };
+
+            if (price) request.minPriceLevel = parseInt(price);
+
+            const categoryMap = {
+                'somtum': 'ส้มตำ ลาบ ไก่ย่าง',
+                'wild_food': 'อาหารป่า',
+                'noodle_shop': 'ก๋วยเตี๋ยว',
+                'thai_restaurant': 'restaurant',
+                'shabu': 'restaurant',
+                'cafe': 'cafe',
+                'restaurant': 'restaurant'
+            };
+
+            if (categoryMap[category]) {
+                if (['thai_restaurant', 'shabu', 'restaurant'].includes(category)) {
+                    request.type = [categoryMap[category]];
+                } else {
+                    request.keyword = categoryMap[category];
+                }
+            }
+
+            service = new google.maps.places.PlacesService(map);
+            service.nearbySearch(request, handleSearchResults);
+        }
+
+        // ===== SEARCH RESULTS HANDLER =====
+        function handleSearchResults(results, status) {
+            if (status === google.maps.places.PlacesServiceStatus.OK && results.length > 0) {
+                restaurants = results
+                    .filter(r => r.name && r.rating)
+                    .sort(() => Math.random() - 0.5)
+                    .slice(0, 10);
+
+                if (restaurants.length === 0) {
+                    alert('ไม่พบร้านที่มีคะแนนในขณะนี้ ลองเปลี่ยนหมวดหมู่ดูนะ!');
+                    return;
+                }
+
+                document.getElementById('store-count').innerText = restaurants.length;
+                document.getElementById('action-area').classList.remove('hidden');
+                drawWheel();
+                document.getElementById('action-area').scrollIntoView({ behavior: 'smooth' });
+            } else {
+                alert('ไม่พบร้านที่เปิดอยู่ในขณะนี้ครับ ลองขยายระยะทางดูนะ!');
+            }
+        }
+
+        // ===== WHEEL DRAWING =====
+        function drawWheel() {
+            const canvas = document.getElementById('wheel-canvas');
+            const ctx = canvas.getContext('2d');
+            const colors = ['#f94144', '#f3722c', '#f8961e', '#f9c74f', '#90be6d', '#43aa8b', '#577590', '#277da1'];
+
+            ctx.clearRect(0, 0, 500, 500);
+            const arc = (2 * Math.PI) / restaurants.length;
+
+            restaurants.forEach((restaurant, i) => {
+                ctx.beginPath();
+                ctx.fillStyle = colors[i % colors.length];
+                ctx.moveTo(250, 250);
+                ctx.arc(250, 250, 240, i * arc, (i + 1) * arc);
+                ctx.fill();
+
+                ctx.save();
+                ctx.translate(250, 250);
+                ctx.rotate(i * arc + arc / 2);
+                ctx.fillStyle = "white";
+                ctx.font = "bold 13px Kanit";
+                ctx.textAlign = "right";
+                ctx.fillText(restaurant.name.substring(0, 15), 230, 5);
+                ctx.restore();
+            });
+        }
+
+        // ===== SPIN WHEEL =====
+        function spinNow() {
+            const canvas = document.getElementById('wheel-canvas');
+            const spinBtn = document.getElementById('spin-btn');
+
+            spinBtn.disabled = true;
+            spinBtn.classList.add('loading');
+
+            const randDeg = Math.floor(6000 + Math.random() * 5000);
+            canvas.style.transform = `rotate(${randDeg}deg)`;
+
+            setTimeout(() => {
+                const index = Math.floor((360 - (randDeg % 360)) / (360 / restaurants.length)) % restaurants.length;
+                const winner = restaurants[index];
+                showPopup(winner);
+                spinBtn.disabled = false;
+                spinBtn.classList.remove('loading');
+            }, 5000);
+        }
+
+        // ===== RATING STARS GENERATOR =====
+        function generateStars(rating) {
+            if (!rating) return '⭐';
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 >= 0.5;
+            let stars = '⭐'.repeat(Math.min(fullStars, 5));
+            if (hasHalfStar && fullStars < 5) stars += '✨';
+            return stars;
+        }
+
+        // ===== POPUP DISPLAY =====
+        function showPopup(winner) {
+            currentWinner = winner;
+            const nameEncoded = encodeURIComponent(winner.name);
+            const lat = winner.geometry.location.lat();
+            const lng = winner.geometry.location.lng();
+
+            document.getElementById('winner-name').innerText = winner.name;
+            document.getElementById('rating-num').innerText = (winner.rating || 'N/A').toFixed(1);
+            document.getElementById('rating-stars').innerText = generateStars(winner.rating);
+            document.getElementById('total-reviews').innerText = winner.user_ratings_total
+                ? `(${winner.user_ratings_total} รีวิว)`
+                : '';
+
+            setupDeepLinks(nameEncoded, lat, lng, winner);
+            updateFavoriteBtnState(winner.place_id);
+
+            history.unshift({
+                name: winner.name,
+                date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            });
+            history = history.slice(0, 5);
+            localStorage.setItem('chaaba_history', JSON.stringify(history));
+            updateHistoryUI();
+
+            document.getElementById('popup').classList.remove('hidden');
+        }
+
+        // ===== DEEP LINKING HANDLER =====
+        function setupDeepLinks(nameEncoded, lat, lng, winner) {
+            document.getElementById('grab-link').onclick = () => {
+                const grabUrl = `grab://food/search?keyword=${nameEncoded}`;
+                window.location.href = grabUrl;
+                setTimeout(() => {
+                    window.open(`https://food.grab.com/th/en/restaurants/search?query=${nameEncoded}`, '_blank');
+                }, 500);
+            };
+
+            document.getElementById('lineman-link').onclick = () => {
+                const linemanUrl = `lineman://search?q=${nameEncoded}`;
+                window.location.href = linemanUrl;
+                setTimeout(() => {
+                    window.open(`https://lineman.line.me/?search=${nameEncoded}`, '_blank');
+                }, 500);
+            };
+
+            document.getElementById('shopee-link').onclick = () => {
+                const shopeeUrl = `shopeefood://search?keyword=${nameEncoded}`;
+                window.location.href = shopeeUrl;
+                setTimeout(() => {
+                    window.open(`https://shopeefood.com/search?keyword=${nameEncoded}`, '_blank');
+                }, 500);
+            };
+
+            document.getElementById('go-link').onclick = () => {
+                window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}&query_place_id=${winner.place_id}`, '_blank');
+            };
+
+            document.getElementById('favorite-btn').onclick = () => {
+                addToFavorites(winner);
+            };
+
+            document.getElementById('share-link').onclick = () => {
+                const txt = `🎯 CHAABA สุ่มมื้อเที่ยงที่ RRP Marketing\n🍴 ร้านที่ได้: ${winner.name}\n⭐ คะแนน: ${winner.rating || 'N/A'}\n📍 แผนที่: https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+                navigator.clipboard.writeText(txt).then(() => {
+                    alert("✅ คัดลอกสรุปแล้ว! วางในกลุ่มได้เลย");
+                }).catch(() => {
+                    alert("❌ ไม่สามารถคัดลอกได้ ลองใหม่อีกครั้ง");
+                });
+            };
+        }
+    </script>
+
+    <!-- Google Maps API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAQlRCVk-178RFu2GCFIVtFr115h0PWC_Y&libraries=places&callback=initMap" async defer></script>
+</body>
+</html>
