@@ -965,15 +965,15 @@
                 'somtum': 'ส้มตำ ลาบ ไก่ย่าง',
                 'wild_food': 'อาหารป่า',
                 'noodle_shop': 'ก๋วยเตี๋ยว',
-                'thai_restaurant': 'restaurant',
-                'shabu': 'restaurant',
+                'thai_restaurant': 'ร้านอาหารไทย',
+                'shabu': 'ชาบู หมูกระทะ',
                 'cafe': 'cafe',
-                'restaurant': 'restaurant'
+                'restaurant': 'food restaurant'
             };
 
             if (categoryMap[category]) {
-                if (['thai_restaurant', 'shabu', 'restaurant'].includes(category)) {
-                    request.type = [categoryMap[category]];
+                if (category === 'cafe') {
+                    request.type = ['cafe'];
                 } else {
                     request.keyword = categoryMap[category];
                 }
