@@ -953,6 +953,13 @@
                 return;
             }
 
+            // Show loading state
+            const searchBtn = document.querySelector('.btn-search');
+            if (searchBtn) {
+                searchBtn.disabled = true;
+                searchBtn.innerHTML = '⏳ กำลังค้นหา...';
+            }
+
             const request = {
                 location: currentPos,
                 radius: radius,
@@ -985,6 +992,13 @@
 
         // ===== SEARCH RESULTS HANDLER =====
         function handleSearchResults(results, status) {
+            // Reset loading state
+            const searchBtn = document.querySelector('.btn-search');
+            if (searchBtn) {
+                searchBtn.disabled = false;
+                searchBtn.innerHTML = '🔍 ค้นหาร้านที่เปิดตอนนี้';
+            }
+
             if (status === google.maps.places.PlacesServiceStatus.OK && results.length > 0) {
                 restaurants = results
                     .filter(r => r.name && r.rating)
