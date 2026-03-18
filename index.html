@@ -1020,24 +1020,56 @@
                 searchBtn.innerHTML = '⏳ กำลังค้นหา...';
             }
 
-            // Simulate API delay (500ms)
-            setTimeout(() => {
-                // Use mock data
-                const results = mockRestaurants.filter(r => r.rating && r.name);
-                handleSearchResults(results, 'OK');
-                
+            // Use Google Places API v2 Nearby Search
+            const categoryMap = {
+                'somtum': 'restaurant',
+                'wild_food': 'restaurant',
+                'noodle_shop': 'restaurant',
+                'thai_restaurant': 'restaurant',
+                'shabu': 'restaurant',
+                'cafe': 'cafe',
+                'restaurant': 'restaurant'
+            };
+
+            const placeType = categoryMap[category] || 'restaurant';
+
+            // Build the request for Places API v2
+            const request = {
+                location: currentPos,
+                radius: radius,
+                type: placeType
+            };
+
+            // Use Places Service for nearby search
+            try {
+                const service = new google.maps.places.PlacesService(map);
+                service.nearbySearch(request, (results, status) => {
+                    if (searchBtn) {
+                        searchBtn.disabled = false;
+                        searchBtn.innerHTML = '🔍 ค้นหาร้านที่เปิดตอนนี้';
+                    }
+                    
+                    if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+                        handleSearchResults(results, status);
+                    } else if (status === google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
+                        handleSearchResults([], status);
+                    } else {
+                        console.error('Places API Error:', status);
+                        handleSearchResults([], 'ERROR');
+                    }
+                });
+            } catch (error) {
+                console.error('Places API Error:', error);
                 if (searchBtn) {
                     searchBtn.disabled = false;
                     searchBtn.innerHTML = '🔍 ค้นหาร้านที่เปิดตอนนี้';
                 }
-            }, 500);
+                handleSearchResults([], 'ERROR');
+            }
         }
 
         // ===== SEARCH RESULTS HANDLER =====
         function handleSearchResults(results, status) {
-            // Clear timeout
-            clearTimeout(window.searchTimeout);
-
             // Reset loading state
             const searchBtn = document.querySelector('.btn-search');
             if (searchBtn) {
@@ -1045,9 +1077,22 @@
                 searchBtn.innerHTML = '🔍 ค้นหาร้านที่เปิดตอนนี้';
             }
 
+            // Check if we have valid results
             if ((status === google.maps.places.PlacesServiceStatus.OK || status === 'OK') && results && results.length > 0) {
+                // Filter and process results
                 restaurants = results
-                    .filter(r => r.name && r.rating)
+                    .filter(r => {
+                        const name = r.displayName?.text || r.name;
+                        const rating = r.rating;
+                        return name && rating;
+                    })
+                    .map(r => ({
+                        name: r.displayName?.text || r.name,
+                        rating: r.rating,
+                        user_ratings_total: r.userRatingCount || r.user_ratings_total || 0,
+                        place_id: r.place_id || r.name,
+                        geometry: r.geometry || { location: { lat: () => r.location?.latitude, lng: () => r.location?.longitude } }
+                    }))
                     .sort(() => Math.random() - 0.5)
                     .slice(0, 20);
 
