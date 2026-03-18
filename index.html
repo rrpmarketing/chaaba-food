@@ -1115,18 +1115,20 @@
             };
 
             document.getElementById('lineman-link').onclick = () => {
-                const linemanUrl = `lineman://search?q=${nameEncoded}`;
+                const linemanUrl = `lineman://food/search?keyword=${nameEncoded}`;
+                const linemanWebUrl = `https://lineman.line.me/web/search?keyword=${nameEncoded}`;
                 window.location.href = linemanUrl;
                 setTimeout(() => {
-                    window.open(`https://lineman.line.me/?search=${nameEncoded}`, '_blank');
+                    window.open(linemanWebUrl, '_blank');
                 }, 500);
             };
 
             document.getElementById('shopee-link').onclick = () => {
                 const shopeeUrl = `shopeefood://search?keyword=${nameEncoded}`;
+                const shopeeWebUrl = `https://shopeefood.com/search?keyword=${nameEncoded}`;
                 window.location.href = shopeeUrl;
                 setTimeout(() => {
-                    window.open(`https://shopeefood.com/search?keyword=${nameEncoded}`, '_blank');
+                    window.open(shopeeWebUrl, '_blank');
                 }, 500);
             };
 
