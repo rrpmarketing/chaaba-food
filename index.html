@@ -861,6 +861,14 @@
                 animation: google.maps.Animation.DROP
             });
 
+            // Update currentPos when marker is dragged
+            marker.addListener('dragend', function() {
+                const newPos = marker.getPosition();
+                currentPos.lat = newPos.lat();
+                currentPos.lng = newPos.lng();
+                map.setCenter(newPos);
+            });
+
             updateHistoryUI();
         }
 
@@ -969,20 +977,21 @@
             if (price) request.minPriceLevel = parseInt(price);
 
             const categoryMap = {
-                'somtum': 'ส้มตำ ลาบ ไก่ย่าง',
-                'wild_food': 'อาหารป่า',
-                'noodle_shop': 'ก๋วยเตี๋ยว',
-                'thai_restaurant': 'ร้านอาหารไทย',
-                'shabu': 'ชาบู หมูกระทะ',
-                'cafe': 'cafe',
-                'restaurant': 'food restaurant'
+                'somtum': { type: ['restaurant'], keyword: 'ส้มตำ ลาบ ไก่ย่าง' },
+                'wild_food': { type: ['restaurant'], keyword: 'อาหารป่า' },
+                'noodle_shop': { type: ['restaurant'], keyword: 'ก๋วยเตี่ยว' },
+                'thai_restaurant': { type: ['restaurant'], keyword: 'ร้านอาหารไทย' },
+                'shabu': { type: ['restaurant'], keyword: 'ชาบู หมูกระทะ' },
+                'cafe': { type: ['cafe'] },
+                'restaurant': { type: ['restaurant'] }
             };
 
             if (categoryMap[category]) {
-                if (category === 'cafe') {
-                    request.type = ['cafe'];
-                } else {
-                    request.keyword = categoryMap[category];
+                if (categoryMap[category].type) {
+                    request.type = categoryMap[category].type;
+                }
+                if (categoryMap[category].keyword) {
+                    request.keyword = categoryMap[category].keyword;
                 }
             }
 
@@ -1002,8 +1011,7 @@
             if (status === google.maps.places.PlacesServiceStatus.OK && results.length > 0) {
                 restaurants = results
                     .filter(r => r.name && r.rating)
-                    .sort(() => Math.random() - 0.5)
-                    .slice(0, 10);
+                    .sort(() => Math.random() - 0.5);
 
                 if (restaurants.length === 0) {
                     alert('ไม่พบร้านที่มีคะแนนในขณะนี้ ลองเปลี่ยนหมวดหมู่ดูนะ!');
