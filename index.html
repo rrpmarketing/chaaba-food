@@ -970,6 +970,30 @@
         }
 
         // ===== STORE FETCHING =====
+        // Mock restaurant data for demo
+        const mockRestaurants = [
+            { name: 'ร้านส้มตำแม่ศรี', rating: 4.5, user_ratings_total: 120, place_id: 'mock_1', geometry: { location: { lat: () => 16.8185, lng: () => 100.2555 } } },
+            { name: 'ร้านอาหารป่าแท้', rating: 4.3, user_ratings_total: 95, place_id: 'mock_2', geometry: { location: { lat: () => 16.8195, lng: () => 100.2565 } } },
+            { name: 'ก๋วยเตี่ยวเนื้อ ป้าแม่', rating: 4.6, user_ratings_total: 150, place_id: 'mock_3', geometry: { location: { lat: () => 16.8175, lng: () => 100.2545 } } },
+            { name: 'ร้านอาหารไทย ครัวบ้าน', rating: 4.4, user_ratings_total: 110, place_id: 'mock_4', geometry: { location: { lat: () => 16.8205, lng: () => 100.2575 } } },
+            { name: 'ชาบู หมูกระทะ ครอบครัว', rating: 4.2, user_ratings_total: 85, place_id: 'mock_5', geometry: { location: { lat: () => 16.8165, lng: () => 100.2535 } } },
+            { name: 'คาเฟ่ดอกไม้', rating: 4.7, user_ratings_total: 200, place_id: 'mock_6', geometry: { location: { lat: () => 16.8215, lng: () => 100.2585 } } },
+            { name: 'ร้านข้าวมันไก่ สีชา', rating: 4.5, user_ratings_total: 130, place_id: 'mock_7', geometry: { location: { lat: () => 16.8155, lng: () => 100.2525 } } },
+            { name: 'ลาบหมู ป้าสมร', rating: 4.4, user_ratings_total: 100, place_id: 'mock_8', geometry: { location: { lat: () => 16.8225, lng: () => 100.2595 } } },
+            { name: 'ร้านเนื้อย่าง ชาววัง', rating: 4.6, user_ratings_total: 140, place_id: 'mock_9', geometry: { location: { lat: () => 16.8145, lng: () => 100.2515 } } },
+            { name: 'ผัดไทย ป้าสมหญิง', rating: 4.3, user_ratings_total: 90, place_id: 'mock_10', geometry: { location: { lat: () => 16.8235, lng: () => 100.2605 } } },
+            { name: 'ร้านต้มยำ ครัวเรือน', rating: 4.5, user_ratings_total: 125, place_id: 'mock_11', geometry: { location: { lat: () => 16.8135, lng: () => 100.2505 } } },
+            { name: 'กาแฟ ร้านเก่า', rating: 4.4, user_ratings_total: 105, place_id: 'mock_12', geometry: { location: { lat: () => 16.8245, lng: () => 100.2615 } } },
+            { name: 'ร้านซูชิ โตเกียว', rating: 4.6, user_ratings_total: 160, place_id: 'mock_13', geometry: { location: { lat: () => 16.8125, lng: () => 100.2495 } } },
+            { name: 'ร้านพิซซ่า อิตาลี่', rating: 4.3, user_ratings_total: 80, place_id: 'mock_14', geometry: { location: { lat: () => 16.8255, lng: () => 100.2625 } } },
+            { name: 'ร้านเบอร์เกอร์ เฮฟวี่', rating: 4.5, user_ratings_total: 135, place_id: 'mock_15', geometry: { location: { lat: () => 16.8115, lng: () => 100.2485 } } },
+            { name: 'ร้านหมี่ เหลือง', rating: 4.4, user_ratings_total: 115, place_id: 'mock_16', geometry: { location: { lat: () => 16.8265, lng: () => 100.2635 } } },
+            { name: 'ร้านสตีก ไฟ', rating: 4.7, user_ratings_total: 180, place_id: 'mock_17', geometry: { location: { lat: () => 16.8105, lng: () => 100.2475 } } },
+            { name: 'ร้านอาหารจีน มังกร', rating: 4.3, user_ratings_total: 75, place_id: 'mock_18', geometry: { location: { lat: () => 16.8275, lng: () => 100.2645 } } },
+            { name: 'ร้านสลัด สดใจ', rating: 4.5, user_ratings_total: 95, place_id: 'mock_19', geometry: { location: { lat: () => 16.8095, lng: () => 100.2465 } } },
+            { name: 'ร้านเกาะลันตา บีช', rating: 4.6, user_ratings_total: 145, place_id: 'mock_20', geometry: { location: { lat: () => 16.8285, lng: () => 100.2655 } } }
+        ];
+
         function fetchStores() {
             const radius = parseInt(document.getElementById('radius').value);
             const category = document.getElementById('category').value;
@@ -987,56 +1011,17 @@
                 searchBtn.innerHTML = '⏳ กำลังค้นหา...';
             }
 
-            // Set timeout for API call (3 seconds)
-            window.searchTimeout = setTimeout(() => {
+            // Simulate API delay (500ms)
+            setTimeout(() => {
+                // Use mock data
+                const results = mockRestaurants.filter(r => r.rating && r.name);
+                handleSearchResults(results, 'OK');
+                
                 if (searchBtn) {
                     searchBtn.disabled = false;
                     searchBtn.innerHTML = '🔍 ค้นหาร้านที่เปิดตอนนี้';
                 }
-                alert('การค้นหาลองเวลานาน ลองลองครับ หรือลองขยายระยะทางดู');
-            }, 3000);
-
-            const request = {
-                location: currentPos,
-                radius: radius
-            };
-
-            if (price) request.minPriceLevel = parseInt(price);
-
-            const categoryMap = {
-                'somtum': { type: ['restaurant'], keyword: 'ส้มตำ ลาบ ไก่ย่าง' },
-                'wild_food': { type: ['restaurant'], keyword: 'อาหารป่า' },
-                'noodle_shop': { type: ['restaurant'], keyword: 'ก๋วยเตี่ยว' },
-                'thai_restaurant': { type: ['restaurant'], keyword: 'ร้านอาหารไทย' },
-                'shabu': { type: ['restaurant'], keyword: 'ชาบู หมูกระทะ' },
-                'cafe': { type: ['cafe'] },
-                'restaurant': { type: ['restaurant'] }
-            };
-
-            if (categoryMap[category]) {
-                if (categoryMap[category].type) {
-                    request.type = categoryMap[category].type;
-                }
-                if (categoryMap[category].keyword) {
-                    request.keyword = categoryMap[category].keyword;
-                }
-            }
-
-            // Use Places API with error handling
-            try {
-                const service = new google.maps.places.PlacesService(map);
-                service.nearbySearch(request, (results, status) => {
-                    try {
-                        handleSearchResults(results, status);
-                    } catch (e) {
-                        console.error('Error handling search results:', e);
-                        handleSearchResults([], 'ZERO_RESULTS');
-                    }
-                });
-            } catch (error) {
-                console.error('PlacesService error:', error);
-                handleSearchResults([], 'ZERO_RESULTS');
-            }
+            }, 500);
         }
 
         // ===== SEARCH RESULTS HANDLER =====
