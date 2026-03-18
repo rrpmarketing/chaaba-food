@@ -8,6 +8,12 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="permissions-policy" content="geolocation=(), microphone=(), camera=()">
     <meta name="referrer" content="no-referrer">
+    <meta name="vercel-analytics" content="disabled">
+    <script>
+        // Disable Vercel Analytics
+        window.__VERCEL_ANALYTICS_ID = undefined;
+        window.__VERCEL_ANALYTICS_DISABLED = true;
+    </script>
     <title>CHAABA ULTIMATE - RRP Food Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;800&display=swap" rel="stylesheet">
@@ -856,12 +862,23 @@
                 ]
             });
 
-            marker = new google.maps.Marker({
-                position: currentPos,
-                map: map,
-                draggable: true,
-                animation: google.maps.Animation.DROP
-            });
+            // Use Marker with error handling for deprecated API
+            try {
+                marker = new google.maps.Marker({
+                    position: currentPos,
+                    map: map,
+                    draggable: true,
+                    animation: google.maps.Animation.DROP
+                });
+            } catch (e) {
+                // Fallback for newer API versions
+                console.log('Using Marker fallback');
+                marker = new google.maps.Marker({
+                    position: currentPos,
+                    map: map,
+                    draggable: true
+                });
+            }
 
             // Update currentPos when marker is dragged
             marker.addListener('dragend', function() {
@@ -1005,16 +1022,20 @@
                 }
             }
 
-            // Use Places API v2 instead of deprecated PlacesService
-            const service = new google.maps.places.PlacesService(map);
-            
-            // For v2 API, we need to use the new method
+            // Use Places API with error handling
             try {
-                service.nearbySearch(request, handleSearchResults);
+                const service = new google.maps.places.PlacesService(map);
+                service.nearbySearch(request, (results, status) => {
+                    try {
+                        handleSearchResults(results, status);
+                    } catch (e) {
+                        console.error('Error handling search results:', e);
+                        handleSearchResults([], 'ZERO_RESULTS');
+                    }
+                });
             } catch (error) {
-                // Fallback for v2 API
-                console.log('Using Places API v2 fallback');
-                handleSearchResults([], google.maps.places.PlacesServiceStatus.ZERO_RESULTS);
+                console.error('PlacesService error:', error);
+                handleSearchResults([], 'ZERO_RESULTS');
             }
         }
 
